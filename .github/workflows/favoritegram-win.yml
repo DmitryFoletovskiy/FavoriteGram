@@ -101,6 +101,7 @@ jobs:
       - name: Prepare third-party libraries
         run: |
           set CARGO_INCREMENTAL=0
+          set SKIP_DUMPSYMS=1
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
 
       - name: Configure API credentials
