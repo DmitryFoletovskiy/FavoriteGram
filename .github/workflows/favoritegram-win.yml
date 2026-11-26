@@ -101,7 +101,7 @@ jobs:
       - name: Prepare third-party libraries
         run: |
           set CARGO_INCREMENTAL=0
-          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-debug silent
+          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
 
       - name: Configure API credentials
         shell: bash
