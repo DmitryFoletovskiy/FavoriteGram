@@ -84,15 +84,17 @@ jobs:
           nuget sources Disable -Name "Microsoft Visual Studio Offline Packages"
           nuget sources Add -Source https://api.nuget.org/v3/index.json & exit 0
 
-      - name: Cache ThirdParty
-        uses: actions/cache@v4
+      - name: Restore ThirdParty cache
+        id: cache-third-party
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.TBUILD }}\ThirdParty
           key: ${{ runner.OS }}-${{ runner.arch }}-fg-third-party-${{ env.CACHE_KEY }}
           restore-keys: ${{ runner.OS }}-${{ runner.arch }}-fg-third-party-
 
-      - name: Cache Libraries (win64)
-        uses: actions/cache@v4
+      - name: Restore Libraries cache (win64)
+        id: cache-libs
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.LibrariesPath }}
           key: ${{ runner.OS }}-x64-fg-libs-${{ env.CACHE_KEY }}
@@ -103,6 +105,20 @@ jobs:
           set CARGO_INCREMENTAL=0
           set SKIP_DUMPSYMS=1
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
+
+      - name: Save ThirdParty cache
+        if: steps.cache-third-party.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.TBUILD }}\ThirdParty
+          key: ${{ runner.OS }}-${{ runner.arch }}-fg-third-party-${{ env.CACHE_KEY }}
+
+      - name: Save Libraries cache (win64)
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.LibrariesPath }}
+          key: ${{ runner.OS }}-x64-fg-libs-${{ env.CACHE_KEY }}
 
       - name: Configure API credentials
         shell: bash
@@ -130,10 +146,11 @@ jobs:
           x64 ^
           %TDESKTOP_BUILD_API% ^
           -D CMAKE_CONFIGURATION_TYPES=Release ^
+          -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
           -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
 
-          cmake --build ..\out --config Release --parallel
+          cmake --build ..\out --config Release --parallel 2 -- /m:2 /p:CL_MPCount=2
 
       - name: Package FavoriteGram portable ZIP
         shell: pwsh
