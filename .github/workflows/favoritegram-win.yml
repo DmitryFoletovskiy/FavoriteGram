@@ -173,7 +173,7 @@ jobs:
           Compress-Archive -Path "$pkgDir\*" -DestinationPath (Join-Path $env:GITHUB_WORKSPACE "artifact\FavoriteGram-win64-portable.zip") -Force
 
       - name: Upload FavoriteGram Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: FavoriteGram-win64-portable
           path: artifact\FavoriteGram-win64-portable.zip
